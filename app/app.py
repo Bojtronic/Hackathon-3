@@ -30,9 +30,11 @@ def home():
 @app.post("/analyze_video")
 async def analyze_video(file: UploadFile):
     contents = await file.read()
-    nparr = np.frombuffer(contents, np.uint8)
-    video = cv2.VideoCapture(cv2.imdecode(nparr, cv2.IMREAD_COLOR))
+    tmp_path = f"/tmp/{file.filename}"
+    with open(tmp_path, "wb") as f:
+        f.write(contents)
 
+    video = cv2.VideoCapture(tmp_path)
     return StreamingResponse(generate_frames(video), media_type="multipart/x-mixed-replace; boundary=frame")
 
 
